@@ -1,6 +1,5 @@
 import { reactive, watch, ref } from "vue";
 import { defineStore } from "pinia";
-import { useAuthStore } from "../auth";
 
 import icpcoinsLogo from "../assets/icpcoins_logo.png";
 import ocDogeIcon from "../assets/oc_doge_icon.png";
@@ -31,14 +30,8 @@ import { initialise } from "@open-ic/openchat-xframe";
 // import adsIcon from "../assets/advertise_icon.png";
 
 export const useMenuItemStore = defineStore("startMenu", () => {
-  const authStore = useAuthStore();
   const whoami = ref("");
   // const devOnly = import.meta.env.DEV;
-
-  function handleSignIn() {
-    authStore.login();
-  }
-
   function initialiseOpenChat(frame: HTMLIFrameElement) {
     initialise(frame, {
       targetOrigin: "https://oc.app",
@@ -51,23 +44,6 @@ export const useMenuItemStore = defineStore("startMenu", () => {
       },
     });
   }
-
-  watch(
-    () => authStore.isAuthenticated,
-    async (isAuthenticated) => {
-      if (isAuthenticated) {
-        if (authStore.dogvertiserActor) {
-          let getWho = await authStore.dogvertiserActor.whoami();
-          whoami.value = getWho.substring(0, 8);
-          startMenuData.bottom[2].name = `Sign Out (${whoami.value})`;
-          startMenuData.bottom[2].action = authStore.logout;
-        }
-      } else {
-        startMenuData.bottom[2].name = "Sign In";
-        startMenuData.bottom[2].action = handleSignIn;
-      }
-    },
-  );
 
   // Define the state as a function that returns the data structure
   const startMenuData: StartMenuData = reactive({
@@ -305,16 +281,6 @@ export const useMenuItemStore = defineStore("startMenu", () => {
         virtualWindow: "blank",
         subType: "unknown",
         visible: true,
-      },
-      {
-        name: "Sign In",
-        icon: keysIcon,
-        iconHeight: 25,
-        url: undefined,
-        virtualWindow: "none",
-        subType: "unknown",
-        visible: false,
-        action: handleSignIn,
       },
       {
         name: "Shut Down",
